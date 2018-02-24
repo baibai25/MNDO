@@ -3,7 +3,7 @@ Multivariate Normal Distribution based Oversampling
 
 ## Usage
 
-First download [Keel datasets](http://sci2s.ugr.es/keel/datasets.php):
+First download [Keel datasets](http://sci2s.ugr.es/keel/datasets.php) and move to /MNDO/Dataset/
 
     MNDO
     └── Dataset
@@ -17,6 +17,7 @@ First download [Keel datasets](http://sci2s.ugr.es/keel/datasets.php):
     └── Multivariate_os.py 
 
 Preprocessing:
+Preprocessed data is saved in /MNDO/Predataset/out_xxx.csv .
 
     $ python pre_dataset.py xxx.dat
 
