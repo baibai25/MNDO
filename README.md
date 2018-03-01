@@ -21,6 +21,8 @@ Preprocessed data is saved in /MNDO/Predataset/out_xxx.csv .
 
     $ python pre_dataset.py xxx.dat
 
+- Positive class -> 1
+- Negative class -> 0
 
 ## Related works
 - [Study on improving prediction accuracy for imbalanced medical data using Multivariate Normal Distribution based Oversampling](http://sotsuron.sd.soft.iwate-pu.ac.jp/images/sotsuron/PDF/0312014015_20180111111148_0312014015.pdf)
