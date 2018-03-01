@@ -43,6 +43,7 @@ def mnd_os(zero_list, zero_mean, pos, num_minority):
         
     # generate new sample
     tmp = []
+    np.random.seed(seed=42)
     for mean, cov in zip(mean_list, cov_list):
         mul_x, mul_y = np.random.multivariate_normal(mean, cov, num_minority).T
         tmp.append(mul_x)
