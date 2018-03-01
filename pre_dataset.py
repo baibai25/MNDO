@@ -16,6 +16,12 @@ for line in file:
         attribute = attribute.strip()
         attribute += ',Label\n'
        # print(attribute)
+    elif (line.find('@input') != -1):
+        attribute = line.replace('@input', '')
+        attribute = attribute.replace(' ', '')
+        attribute = attribute.strip()
+        attribute += ',Label\n'
+
     #delete strings
     if (line.find('@') != -1):
         del line
