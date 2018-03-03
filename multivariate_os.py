@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 
 def find_zerostd(pos):
+    
+    print("Searching zero std...")
     std = pos.std()
     mean = pos.mean()
 
@@ -10,18 +12,20 @@ def find_zerostd(pos):
 
     for i in range(len(pos.columns)):
         if std[i] == 0:
-            print(pos.columns[i])
+            print("Found zero std!")
+            #print(pos.columns[i])
             zero_list.append(pos.columns[i])
             zero_mean.append(mean[i])
             pos = pos.drop(pos.columns[i], axis=1)
-    print(zero_list)
-    print(zero_mean)
+    #print(zero_list)
+    #print(zero_mean)
+    print("Finished.")
     return zero_list, zero_mean, pos
     
 def mnd_os(zero_list, zero_mean, pos, num_minority):
     #calc correlation and covert absolute value
     corr = abs(pos.corr())
-    print(corr)
+    #print(corr)
     
     #find strong correlation attribute
     corr_col = []
@@ -31,8 +35,8 @@ def mnd_os(zero_list, zero_mean, pos, num_minority):
         sort = sort.sort_values(by=sort.columns[0], ascending=False) #sort
         corr_col.append(sort.columns[0]) #strong corr coulumns
         corr_ind.append(sort.index[1]) #strong corr index
-    print(corr_col)
-    print(corr_ind)
+    #print(corr_col)
+    #print(corr_ind)
     
     #calc mean and covariance
     mean_list = []
@@ -58,6 +62,6 @@ def mnd_os(zero_list, zero_mean, pos, num_minority):
             df[zero_list[i]] = zero_mean[i]
             
     df['Label'] = 1
-    df.to_csv('/home/yura/Desktop/mlpd_train.csv', index=False)
+    #df.to_csv('/home/yura/Desktop/mlpd_train.csv', index=False)
     return df
     #df
