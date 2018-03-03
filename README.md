@@ -21,12 +21,17 @@ First download [Keel datasets](http://sci2s.ugr.es/keel/datasets.php) and move t
     └── Multivariate_os.py 
 
 Preprocessing:
-Preprocessed data is saved in /MNDO/Predataset/out_xxx.csv .
+Preprocessed data is saved in MNDO/Predataset/out_xxx.csv
 
     $ python pre_dataset.py xxx.dat
 
 - Positive class -> 1
 - Negative class -> 0
+
+Training:
+[classification_report_imbalanced](http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.metrics.classification_report_imbalanced.html) is saved in output/svm_out_xxx.csv
+    
+    $ python train.py Predataset/out_xxx.csv
 
 ## Related works
 - [Study on improving prediction accuracy for imbalanced medical data using Multivariate Normal Distribution based Oversampling](http://sotsuron.sd.soft.iwate-pu.ac.jp/images/sotsuron/PDF/0312014015_20180111111148_0312014015.pdf)
