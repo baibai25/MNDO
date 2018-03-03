@@ -12,6 +12,9 @@ First download [Keel datasets](http://sci2s.ugr.es/keel/datasets.php) and move t
     └── Predataset
         └── out_xxx.csv
         └── out_yyy.csv
+    └── output
+        └── svm_out_xxx.csv
+        └── knn_yyy.csv        
     ├── train.ipynb
     ├── pre_dataset.py
     └── Multivariate_os.py 
