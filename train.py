@@ -26,6 +26,7 @@ basename = os.path.basename(sys.argv[1])
 name = os.path.splitext(basename)
 svm_out = 'output/svm_{}.csv'.format(name[0])
 knn_out = 'output/knn_{}.csv'.format(name[0])
+auc_out = 'output/auc_{}.csv'.format(name[0])
 
 X = data.drop('Label', axis=1)
 y = data.Label
@@ -34,7 +35,7 @@ pos = pos.drop('Label', axis=1)
 
 
 # In[3]:
-RANDOM_STATE = 42
+RANDOM_STATE = 6
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=RANDOM_STATE)
 cnt = Counter(y_train)
@@ -86,6 +87,7 @@ def report_to_df(report):
 print("Start Learning")
 svm_clf = []
 svm_df = pd.DataFrame(index=[], columns=[])
+auc_list = []
 
 for i in range(len(os_list)):
     svm_clf.append(svm.SVC(random_state=RANDOM_STATE, probability=True).fit(os_list[i][0], os_list[i][1]))
@@ -97,7 +99,8 @@ for i in range(len(svm_clf)):
     prob = svm_clf[i].predict_proba(X_test)[:,1]
     fpr, tpr, thresholds = roc_curve(y_test, prob)
     roc_auc_area = auc(fpr, tpr)
-    print('AUC={}'.format(roc_auc_area))
+    #print('AUC={}'.format(roc_auc_area))
+    auc_list.append(roc_auc_area)
 
 
 # In[10]:
@@ -116,10 +119,13 @@ for i in range(len(knn_clf)):
     prob = knn_clf[i].predict_proba(X_test)[:,1]
     fpr, tpr, thresholds = roc_curve(y_test, prob)
     roc_auc_area = auc(fpr, tpr)
-    print('AUC={}'.format(roc_auc_area))
+    #print('AUC={}'.format(roc_auc_area))
+    auc_list.append(roc_auc_area)
 
+auc_df = pd.DataFrame(auc_list)
 
 # In[12]:
 svm_df.to_csv(svm_out)
 knn_df.to_csv(knn_out)
+auc_df.to_csv(auc_out)
 print("Finished!")
