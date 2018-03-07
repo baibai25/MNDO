@@ -46,9 +46,10 @@ print(num_minority)
 
 
 # In[4]:
-zero_list, zero_mean, pos = multivariate_os.find_zerostd(pos)
-df = multivariate_os.mnd_os(zero_list, zero_mean, pos, num_minority)
-
+pos, zero_std = multivariate_os.find_zerostd(pos, num_minority)
+pos, no_corr = multivariate_os.no_corr(pos, num_minority)
+pos = multivariate_os.mnd_os(pos, num_minority)
+df = multivariate_os.append_data(pos, zero_std, no_corr)
 
 # # Learning
 # In[5]:
