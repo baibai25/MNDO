@@ -9,13 +9,13 @@ output = 'Predataset/out_{}.csv'.format(name[0])
 
 file2=[]
 for line in file:
-    #extract attrivute
+    #extract attribute
     if (line.find('@inputs') != -1):
         attribute = line.replace('@inputs', '')
         attribute = attribute.replace(' ', '')
         attribute = attribute.strip()
         attribute += ',Label\n'
-       # print(attribute)
+        #print(attribute)
     elif (line.find('@input') != -1):
         attribute = line.replace('@input', '')
         attribute = attribute.replace(' ', '')
@@ -34,6 +34,7 @@ for line in file:
         elif (line.find('negative') != -1):
             neg = line.replace('negative', '0')
             file2.append(neg)
+print(file2)
 file2.insert(0, attribute)
 
 
