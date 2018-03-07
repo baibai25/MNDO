@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-def find_zerostd(pos): 
+# Find zero standard deviation
+def find_zerostd(pos, num_minority): 
     print("Searching zero std...")
     std = pos.std()
     mean = pos.mean()
@@ -13,44 +14,76 @@ def find_zerostd(pos):
             print(pos.columns[i] + " : Found zero std!")
             zero_list.append(pos.columns[i])
             zero_mean.append(mean[i])
-            pos = pos.drop(pos.columns[i], axis=1)
-    
-    if (len(zero_list) == 0) and (len(zero_mean) == 0): 
-        print("Not found zero std.")
     #print(zero_list)
     #print(zero_mean)
-    print("Finished.")
-    return zero_list, zero_mean, pos
 
-#######################################
-# TO-DO
-# 1. extract no_corr attribute values
-# 2. calc mean and var
-# 3. create normal dist
-#######################################
+    if (len(zero_list) == 0) and (len(zero_mean) == 0): 
+        print("Not found zero std.")
+        df = None
+    else:
+        df_index = np.zeros(shape=(num_minority, len(zero_list)))
+        df = pd.DataFrame(df_index, columns=zero_list)
 
-def no_corr(pos):
+        for i in range(len(zero_list)): 
+            pos.drop(zero_list[i], axis=1, inplace=True)
+            df[zero_list[i]] = zero_mean[i]
+        print("Finished.")
+    #print(pos)
+    #print(df)
+    return pos, df
+
+
+# Find no correlation and univariate sampling
+def no_corr(pos, num_minority):
+    print("Searching no correlation...")
     corr = abs(pos.corr())
-    nocorr_list = []    
+    nocorr_df = pd.DataFrame(index=[], columns=[]) 
+    mean_list = []
+    var_list = []
+    col_list = []
 
+    # split no corr attribute and calc mean and var.
     for i in range(len(corr.columns)):
         sort = corr.iloc[:, [i]]
         sort = sort.sort_values(by=sort.columns[0], ascending=False) #sort
         
         if sort.values[1] < 0.2:
-            print("Found no correlation")
-            print(sort)
-            print(sort.values[1])
-            nocorr_list.append(pos.columns[i])
-            pos = pos.drop(pos.columns[i], axis=1)
-    #return pos
+            print(pos.columns[i] + " : Found no correlationi!")
+            #print(sort.values[1])
+            mean_list.append(pos[pos.columns[i]].mean())
+            var_list.append(pos[pos.columns[i]].var())
+            col_list.append(pos.columns[i])
+    
+    if (len(mean_list)==0) and (len(var_list)==0) and (len(col_list)==0): 
+        print("Not found no correlation.")
+        df = None
+    else: 
+        # univariate normal dist over-sampling
+        tmp = []
+        np.random.seed(seed=6)
+        for mean, var in zip(mean_list, var_list):
+            uni_x = np.random.normal(mean, var, num_minority)
+            tmp.append(uni_x)
+    
+        # convert to dataframe
+        df = pd.DataFrame(tmp).T
+        df.columns = col_list
+        # drop no correlation attributes
+        for  i in range(len(col_list)):
+            pos.drop(col_list[i], axis=1, inplace=True)
 
-def mnd_os(zero_list, zero_mean, pos, num_minority):
-    #calc correlation and covert absolute value
+    #print(mean_list, var_list)
+    #print(df)
+    #print(pos)
+    return pos, df
+
+# Multivariate sampling
+def mnd_os(pos, num_minority):
+    # calc correlation and covert absolute value
     corr = abs(pos.corr())
     #print(corr)
     
-    #find strong correlation attribute
+    # find strong correlation attribute
     corr_col = []
     corr_ind = []
     for i in range(len(corr.columns)):
@@ -62,7 +95,7 @@ def mnd_os(zero_list, zero_mean, pos, num_minority):
     #print(corr_col)
     #print(corr_ind)
     
-    #calc mean and covariance
+    # calc mean and covariance
     mean_list = []
     cov_list = []
     for i in range(len(pos.columns)):
@@ -75,16 +108,16 @@ def mnd_os(zero_list, zero_mean, pos, num_minority):
     for mean, cov in zip(mean_list, cov_list):
         mul_x, mul_y = np.random.multivariate_normal(mean, cov, num_minority).T
         tmp.append(mul_x)
-        #sns.jointplot(mul_x, mul_y, kind="resid")
     
-    #append original data
+    # convert to dataframe
     df = pd.DataFrame(tmp).T
     df.columns = pos.columns
-    
-    if len(zero_list) != 0:
-        for i in range(len(zero_list)):
-            df[zero_list[i]] = zero_mean[i]
-            print(zero_list[i])
-    df['Label'] = 1
-    #df.to_csv('/home/yura/Desktop/mlpd_train.csv', index=False)
+    #print(df)
     return df
+
+def append_data(pos, zero_std, no_corr):
+    pos = pd.concat([pos, zero_std, no_corr], axis=1)
+    pos['Label'] = 1
+    #print(pos)
+    #pos.to_csv('/home/yura/Desktop/mlpd_train.csv', index=False)
+    return pos
