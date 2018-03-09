@@ -28,7 +28,7 @@ If you use [Keel-datasets](http://sci2s.ugr.es/keel/datasets.php), you can use t
 
     $ python pre_dataset.py xxx.dat
 
-###Training
+### Training
 [classification_report_imbalanced](http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.metrics.classification_report_imbalanced.html) is saved in output/svm_out_xxx.csv
     
     $ python train.py Predataset/out_xxx.csv
