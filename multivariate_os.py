@@ -32,7 +32,6 @@ def find_zerostd(pos, num_minority):
     #print(df)
     return pos, df
 
-
 # Find no correlation and univariate sampling
 def no_corr(pos, num_minority):
     for i in tqdm(range(100), desc="Searching no correlation", leave=False):
@@ -122,3 +121,4 @@ def append_data(pos, zero_std, no_corr):
     #print(pos)
     #pos.to_csv('/home/yura/Desktop/mlpd_train.csv', index=False)
     return pos
+
