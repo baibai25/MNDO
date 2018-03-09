@@ -22,11 +22,13 @@ First download datasets and move to /MNDO/Dataset/
 
 ### Preprocessing
 If you use [Keel-datasets](http://sci2s.ugr.es/keel/datasets.php), you can use the following command.
+
+    $ python pre_dataset.py xxx.dat
+
 + Remove unnecessary lines and replace.
 + Replace class labels. (Positive class -> 1, Negative class -> 0)
 + Preprocessed data is saved in MNDO/Predataset/out_xxx.csv
 
-    $ python pre_dataset.py xxx.dat
 
 ### Training
 [classification_report_imbalanced](http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.metrics.classification_report_imbalanced.html) is saved in output/svm_out_xxx.csv
