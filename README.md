@@ -25,8 +25,7 @@ If you use [Keel-datasets](http://sci2s.ugr.es/keel/datasets.php), you can use t
 
     $ python pre_dataset.py xxx.dat
 
-+ Remove unnecessary lines and replace.
-+ Replace class labels. (Positive class -> 1, Negative class -> 0)
++ Remove unnecessary lines and replace class labels. (Positive class -> 1, Negative class -> 0)
 + Preprocessed data is saved in MNDO/Predataset/out_xxx.csv
 
 
