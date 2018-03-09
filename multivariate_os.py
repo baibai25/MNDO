@@ -4,9 +4,7 @@ from tqdm import tqdm
 
 # Find zero standard deviation
 def find_zerostd(pos, num_minority): 
-    
-    for i in tqdm(range(100), desc="Searching zero std"):
-        #print("Searching zero std...")
+    for i in tqdm(range(100), desc="Searching zero std", leave=False):
         std = pos.std()
         mean = pos.mean()
         zero_list = []
@@ -23,7 +21,7 @@ def find_zerostd(pos, num_minority):
         print("Not found zero std.")
         df = None
     else:
-        print("Found! {}".format(zero_list))
+        print("Found zero std! {}".format(zero_list))
         df_index = np.zeros(shape=(num_minority, len(zero_list)))
         df = pd.DataFrame(df_index, columns=zero_list)
 
@@ -37,8 +35,7 @@ def find_zerostd(pos, num_minority):
 
 # Find no correlation and univariate sampling
 def no_corr(pos, num_minority):
-
-    for i in tqdm(range(100), desc="Searching no correlation"):
+    for i in tqdm(range(100), desc="Searching no correlation", leave=False):
         corr = abs(pos.corr())
         nocorr_df = pd.DataFrame(index=[], columns=[]) 
         mean_list = []
@@ -60,7 +57,7 @@ def no_corr(pos, num_minority):
         print("Not found no correlation.")
         df = None
     else:
-        print("Found! {}".format(col_list))
+        print("Found no corr! {}".format(col_list))
         # univariate normal dist over-sampling
         tmp = []
         np.random.seed(seed=6)
@@ -82,8 +79,7 @@ def no_corr(pos, num_minority):
 
 # Multivariate sampling
 def mnd_os(pos, num_minority):
-
-    for i in tqdm(range(100), desc="Multi normal dist over-sampling"):
+    for i in tqdm(range(100), desc="Multi normal dist over-sampling", leave=False):
         # calc correlation and covert absolute value
         corr = abs(pos.corr())
         #print(corr)

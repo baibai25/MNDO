@@ -38,7 +38,6 @@ cnt = Counter(y_train)
 num_minority = int((cnt[0] - cnt[1]))
 print('y_train: {}'.format(Counter(y_train)))
 print('y_test: {}'.format(Counter(y_test)))
-print(num_minority)
 
 # Multivariate over-sampling
 pos, zero_std = multivariate_os.find_zerostd(pos, num_minority)
@@ -48,14 +47,14 @@ df = multivariate_os.append_data(pos, zero_std, no_corr)
 
 
 ## Preprocessing
- # df + train data
+# df + train data
 X_mlpd = df.drop('Label', axis=1)
 y_mlpd = df.Label
 X_mlpd = pd.concat([X_mlpd, X_train])
 y_mlpd = pd.concat([y_mlpd, y_train])
 print('y_mlpd: {}'.format(Counter(y_mlpd)))
 
-for i in tqdm(range(100), desc="Preprocessing"):
+for i in tqdm(range(100), desc="Preprocessing", leave=False):
     #Apply over-sampling
     sm_reg = over_sampling.SMOTE(kind='regular', random_state=RANDOM_STATE)
     ada = over_sampling.ADASYN(random_state=RANDOM_STATE)
@@ -80,24 +79,25 @@ def report_to_df(report):
     return(report_df)
 
 # start learning
-for i in tqdm(range(100), desc="Learning"):
+for i in tqdm(range(100), desc="Learning", leave=False):
     svm_clf = []
     svm_df = pd.DataFrame(index=[], columns=[])
     auc_list = []
-
     # svm
     for i in range(len(os_list)):
-        svm_clf.append(svm.SVC(random_state=RANDOM_STATE, probability=True, class_weight='balanced').fit(os_list[i][0], os_list[i][1]))
+        svm_clf.append(svm.SVC(random_state=RANDOM_STATE, probability=True).fit(os_list[i][0], os_list[i][1]))
         
     for i in range(len(svm_clf)):
         pred = classification_report_imbalanced(y_test, svm_clf[i].predict(X_test))
         svm_df = svm_df.append(report_to_df(pred))
         #calc auc
         prob = svm_clf[i].predict_proba(X_test)[:,1]
-        fpr, tpr, thresholds = roc_curve(y_test, prob)
+        fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
         roc_auc_area = auc(fpr, tpr)
         #print('AUC={}'.format(roc_auc_area))
         auc_list.append(roc_auc_area)
+
+
 
     #k-NN
     k=3
@@ -112,14 +112,18 @@ for i in tqdm(range(100), desc="Learning"):
         knn_df = knn_df.append(report_to_df(pred))
         #calc auc
         prob = knn_clf[i].predict_proba(X_test)[:,1]
-        fpr, tpr, thresholds = roc_curve(y_test, prob)
+        fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
         roc_auc_area = auc(fpr, tpr)
         #print('AUC={}'.format(roc_auc_area))
         auc_list.append(roc_auc_area)
 
     auc_df = pd.DataFrame(auc_list)
 
-    # export resualt
-    svm_df.to_csv(svm_out)
-    knn_df.to_csv(knn_out)
-    auc_df.to_csv(auc_out)
+#print(svm_df)
+#print(knn_df)
+#print(auc_df)
+
+# export resualt
+svm_df.to_csv(svm_out)
+knn_df.to_csv(knn_out)
+auc_df.to_csv(auc_out)
