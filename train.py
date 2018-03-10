@@ -4,21 +4,16 @@ import os.path
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-import multivariate_os
+from src import multivariate_os, predict_data, preprocessing
 import matplotlib.pyplot as plt
 from collections import Counter
 from sklearn.model_selection import train_test_split
 from imblearn import over_sampling
 from imblearn import combine
-from sklearn.preprocessing import normalize
-from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from imblearn import metrics
 from sklearn.metrics import roc_curve, auc
-import re
-from io import StringIO
 
 # set save path
 def set_path(basename):
@@ -41,36 +36,6 @@ def append_mndo(X_train, y_train, df):
     X_mndo = pd.concat([X_mndo, X_train])
     y_mndo = pd.concat([y_mndo, y_train])
     return X_mndo, y_mndo
-
-# normalize
-def normalization(os_list):
-    for i in range(len(os_list)):
-        os_list[i][0] = normalize(os_list[i][0], norm='l2') 
-    return os_list  
-
-# Standardization
-def standardization(os_list):
-    for i in range(len(os_list)):
-        sc = StandardScaler()
-        os_list[i][0] = sc.fit_transform(os_list[i][0])
-    return os_list
-
-def calc_metrics(y_test, pred, auc, i):
-        sen_macro = metrics.sensitivity_score(y_test, pred, pos_label=1, average='macro')   
-        sen_micro = metrics.sensitivity_score(y_test, pred, pos_label=1, average='micro')    
-        spe_macro = metrics.specificity_score(y_test, pred, pos_label=1, average='macro')   
-        spe_micro = metrics.specificity_score(y_test, pred, pos_label=1, average='micro')
-        geo_macro = metrics.geometric_mean_score(y_test, pred, pos_label=1, average='macro')   
-        geo_mico = metrics.geometric_mean_score(y_test, pred, pos_label=1, average='micro')
-        index = ['sm', 'b1', 'b2', 'enn', 'tom', 'ada', 'mnd'] 
-        metrics_list = [index[i], sen_macro, sen_micro, spe_macro, spe_micro, geo_macro, geo_mico, auc]
-        return metrics_list
-
-# convert classification report to dataframe
-def report_to_df(report):
-    report = re.sub(r" +", " ", report).replace("avg / total", "avg/total").replace("\n ", "\n")
-    report_df = pd.read_csv(StringIO("Classes" + report), sep=' ', index_col=0)        
-    return(report_df)
 
 if __name__ == '__main__':
     # Load dataset
@@ -117,8 +82,8 @@ if __name__ == '__main__':
                 [X_tomek, y_tomek], [X_ada, y_ada], [X_mndo, y_mndo]]
         
         # normalize
-        #os_list = normalization(os_list)
-        #os_list = standardization(os_list)
+        #os_list = preprocessing.normalization(os_list)
+        #os_list = preprocessing.standardization(os_list)
         
     #-------------
     # Learning
@@ -134,7 +99,8 @@ if __name__ == '__main__':
             prob = svm_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            pred_tmp.append(calc_metrics(y_test, svm_clf[i].predict(X_test), roc_auc_area, i))
+            pred_tmp.append(predict_data.calc_metrics(y_test, svm_clf[i].predict(X_test), roc_auc_area, i))
+
         
         # tree
         tree_clf = []
@@ -146,7 +112,7 @@ if __name__ == '__main__':
             prob = tree_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            pred_tmp.append(calc_metrics(y_test, tree_clf[i].predict(X_test), roc_auc_area, i))
+            pred_tmp.append(predict_data.calc_metrics(y_test, tree_clf[i].predict(X_test), roc_auc_area, i))
 
         #k-NN
         k=3
@@ -159,7 +125,7 @@ if __name__ == '__main__':
             prob = knn_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            pred_tmp.append(calc_metrics(y_test, knn_clf[i].predict(X_test), roc_auc_area, i))
+            pred_tmp.append(predict_data.calc_metrics(y_test, knn_clf[i].predict(X_test), roc_auc_area, i))
 
     pred_df = pd.DataFrame(pred_tmp)
     pred_df.columns = ['os', 'sen(macro)', 'sen(micro)', 'spe(macro)', 'spe(micro)', 'geo(macro)', 'geo(micro)', 'AUC']
