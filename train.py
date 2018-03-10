@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from imblearn.metrics import classification_report_imbalanced
+from imblearn import metrics
 from sklearn.metrics import roc_curve, auc
 import re
 from io import StringIO
@@ -55,6 +55,16 @@ def standardization(os_list):
         os_list[i][0] = sc.fit_transform(os_list[i][0])
     return os_list
 
+def calc_metrics(y_test, pred, auc, i):
+        sen_macro = metrics.sensitivity_score(y_test, pred, pos_label=1, average='macro')   
+        sen_micro = metrics.sensitivity_score(y_test, pred, pos_label=1, average='micro')    
+        spe_macro = metrics.specificity_score(y_test, pred, pos_label=1, average='macro')   
+        spe_micro = metrics.specificity_score(y_test, pred, pos_label=1, average='micro')
+        geo_macro = metrics.geometric_mean_score(y_test, pred, pos_label=1, average='macro')   
+        geo_mico = metrics.geometric_mean_score(y_test, pred, pos_label=1, average='micro')
+        index = ['sm', 'b1', 'b2', 'enn', 'tom', 'ada', 'mnd'] 
+        metrics_list = [index[i], sen_macro, sen_micro, spe_macro, spe_micro, geo_macro, geo_mico, auc]
+        return metrics_list
 
 # convert classification report to dataframe
 def report_to_df(report):
@@ -115,65 +125,44 @@ if __name__ == '__main__':
     #-------------
     for i in tqdm(range(100), desc="Learning", leave=False):
         svm_clf = []
-        pred_df = pd.DataFrame(index=[], columns=[])
-        auc_list = []
+        pred_tmp = []
         for i in range(len(os_list)):
             svm_clf.append(svm.SVC(random_state=RANDOM_STATE, probability=True).fit(os_list[i][0], os_list[i][1]))
             
         for i in range(len(svm_clf)):
-            pred = classification_report_imbalanced(y_test, svm_clf[i].predict(X_test))
-            pred_df = pred_df.append(report_to_df(pred))
             # calc auc
             prob = svm_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-
-            auc_df = pd.DataFrame(columns=pred_df.columns, index=[roc_auc_area])
-            auc_df = auc_df.fillna('-')
-            pred_df = pred_df.append(auc_df)
-        delimiter = pd.DataFrame(columns=pred_df.columns, index=['#'])
-        delimiter = delimiter.fillna('#')
-        pred_df = pred_df.append(delimiter)
-
+            pred_tmp.append(calc_metrics(y_test, svm_clf[i].predict(X_test), roc_auc_area, i))
+        
         # tree
         tree_clf = []
         for i in range(len(os_list)):
             tree_clf.append(DecisionTreeClassifier(random_state=RANDOM_STATE).fit(os_list[i][0], os_list[i][1]))
             
         for i in range(len(tree_clf)):
-            pred = classification_report_imbalanced(y_test, tree_clf[i].predict(X_test))
-            pred_df = pred_df.append(report_to_df(pred))
             # calc auc
             prob = tree_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-
-            auc_df = pd.DataFrame(columns=pred_df.columns, index=[roc_auc_area])
-            auc_df = auc_df.fillna('-')
-            pred_df = pred_df.append(auc_df)
-        pred_df = pred_df.append(delimiter)
+            pred_tmp.append(calc_metrics(y_test, tree_clf[i].predict(X_test), roc_auc_area, i))
 
         #k-NN
         k=3
         knn_clf = []
-        #knn_df = pd.DataFrame(index=[], columns=[])
         for i in range(len(os_list)):
             knn_clf.append(KNeighborsClassifier(n_neighbors=k).fit(os_list[i][0], os_list[i][1]))
             
         for i in range(len(knn_clf)):
-            pred = classification_report_imbalanced(y_test, knn_clf[i].predict(X_test))
-            pred_df = pred_df.append(report_to_df(pred))
             # calc auc
             prob = knn_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            
-            auc_df = pd.DataFrame(columns=pred_df.columns, index=[roc_auc_area])
-            auc_df = auc_df.fillna('-')
-            pred_df = pred_df.append(auc_df)
-        auc_df = pd.DataFrame(auc_list)
-    #print(pred_df)
-    #print(auc_df)
+            pred_tmp.append(calc_metrics(y_test, knn_clf[i].predict(X_test), roc_auc_area, i))
 
-    # export resualt
-    pred_df.to_csv(save_path[0])
+    pred_df = pd.DataFrame(pred_tmp)
+    pred_df.columns = ['os', 'sen(macro)', 'sen(micro)', 'spe(macro)', 'spe(micro)', 'geo(macro)', 'geo(micro)', 'AUC']
+   
+   # export resualt
+    pred_df.to_csv(save_path, index=False)
