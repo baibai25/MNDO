@@ -15,9 +15,12 @@ First download datasets and move to MNDO/Dataset/
         └── yyy1.csv
     └── output
         └── out_xxx.csv
+    └── src
+        └── multivariate_os.py
+        └── predict_data.py
+        └── preprocessing.py
     ├── train.py
-    ├── pre_dataset.py
-    └── multivariate_os.py 
+    └── pre_dataset.py 
 
 ### Preprocessing
 If you use [Keel-datasets](http://sci2s.ugr.es/keel/datasets.php), you can use the following command.
