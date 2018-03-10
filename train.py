@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from imblearn import over_sampling
 from imblearn import combine
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -22,9 +23,7 @@ from io import StringIO
 # set save path
 def set_path(basename):
     name = os.path.splitext(basename)
-    pred_out = 'output/pred_{}.csv'.format(name[0])
-    auc_out = 'output/auc_{}.csv'.format(name[0])
-    save_path = [pred_out, auc_out]
+    save_path = 'output/{}.csv'.format(name[0])
     return save_path
 
 # Multivariate over-sampling
@@ -48,6 +47,14 @@ def normalization(os_list):
     for i in range(len(os_list)):
         os_list[i][0] = normalize(os_list[i][0], norm='l2') 
     return os_list  
+
+# Standardization
+def standardization(os_list):
+    for i in range(len(os_list)):
+        sc = StandardScaler()
+        os_list[i][0] = sc.fit_transform(os_list[i][0])
+    return os_list
+
 
 # convert classification report to dataframe
 def report_to_df(report):
@@ -100,7 +107,8 @@ if __name__ == '__main__':
                 [X_tomek, y_tomek], [X_ada, y_ada], [X_mndo, y_mndo]]
         
         # normalize
-        os_list = normalization(os_list)
+        #os_list = normalization(os_list)
+        #os_list = standardization(os_list)
         
     #-------------
     # Learning
