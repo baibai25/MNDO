@@ -101,7 +101,6 @@ if __name__ == '__main__':
         
         # normalize
         os_list = normalization(os_list)
-        print(os_list[0][0])
         
     #-------------
     # Learning
@@ -120,7 +119,10 @@ if __name__ == '__main__':
             prob = svm_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            auc_list.append(roc_auc_area)
+
+            auc_df = pd.DataFrame(columns=pred_df.columns, index=[roc_auc_area])
+            auc_df = auc_df.fillna('-')
+            pred_df = pred_df.append(auc_df)
         delimiter = pd.DataFrame(columns=pred_df.columns, index=['#'])
         delimiter = delimiter.fillna('#')
         pred_df = pred_df.append(delimiter)
@@ -137,7 +139,10 @@ if __name__ == '__main__':
             prob = tree_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            auc_list.append(roc_auc_area)
+
+            auc_df = pd.DataFrame(columns=pred_df.columns, index=[roc_auc_area])
+            auc_df = auc_df.fillna('-')
+            pred_df = pred_df.append(auc_df)
         pred_df = pred_df.append(delimiter)
 
         #k-NN
@@ -154,12 +159,13 @@ if __name__ == '__main__':
             prob = knn_clf[i].predict_proba(X_test)[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            auc_list.append(roc_auc_area)
-
+            
+            auc_df = pd.DataFrame(columns=pred_df.columns, index=[roc_auc_area])
+            auc_df = auc_df.fillna('-')
+            pred_df = pred_df.append(auc_df)
         auc_df = pd.DataFrame(auc_list)
     #print(pred_df)
     #print(auc_df)
 
     # export resualt
     pred_df.to_csv(save_path[0])
-    auc_df.to_csv(save_path[1])
