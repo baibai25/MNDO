@@ -1,7 +1,7 @@
 #!/bin/sh
-path=Predataset/0/
+path=Predataset/
 
-for file in `ls Predataset/0`
+for file in `ls Predataset/`
 do
     argv=$path$file
     echo $file
