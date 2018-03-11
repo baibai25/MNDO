@@ -54,6 +54,11 @@ if __name__ == '__main__':
     num_minority = int((cnt[0] - cnt[1]))
     print('y_train: {}'.format(Counter(y_train)))
     print('y_test: {}'.format(Counter(y_test)))
+    
+    if cnt[1] < 6:
+        print("Can't apply SMOTE. Positive class samples is very small.")
+        print("See : https://github.com/scikit-learn-contrib/imbalanced-learn/issues/27")
+        sys.exit()
 
     #-----------------
     # Preprocessing
