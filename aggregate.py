@@ -24,13 +24,12 @@ if __name__ == '__main__':
             data = pd.read_csv(files[j])
             a = data[data['os'] == ind[i]]
 
-            svm = pd.concat([svm, a.iloc[[0]]])
-            tree = pd.concat([tree, a.iloc[[0]]])
-            knn = pd.concat([knn, a.iloc[[0]]])
-
+            svm = pd.concat([svm, a.iloc[[0]]], ignore_index=True)
+            tree = pd.concat([tree, a.iloc[[1]]], ignore_index=True)
+            knn = pd.concat([knn, a.iloc[[2]]], ignore_index=True)
+        
         df = pd.concat([svm, tree, knn], axis=1)
         df.index = name
         df.drop('os', axis=1, inplace=True)
-
         path = 'output/all/{}.csv'.format(ind[i])
         df.to_csv(path)
