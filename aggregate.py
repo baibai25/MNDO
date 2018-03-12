@@ -13,8 +13,8 @@ if __name__ == '__main__':
     files = glob.glob('output/*.csv')
     name = get_name(files)
     ind = ['sm', 'b1', 'b2', 'enn', 'tom', 'ada', 'mnd']
-    col = ['os', 'sen(macro)', 'sen(micro)', 'spe(macro)', 'spe(micro)', 'geo(macro)', 'geo(micro)', 'AUC']
-    
+    col = ['os', 'Sensitivity', 'Specificity', 'Geometric mean', 'AUC'] 
+
     for i in range(len(ind)):
         svm = pd.DataFrame(index=[], columns=col)
         tree = pd.DataFrame(index=[], columns=col)
