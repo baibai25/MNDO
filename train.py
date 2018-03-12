@@ -96,6 +96,8 @@ if __name__ == '__main__':
     for i in tqdm(range(100), desc="Learning", leave=False):
         svm_clf = []
         pred_tmp = []
+
+        #svm
         for i in range(len(os_list)):
             svm_clf.append(svm.SVC(random_state=RANDOM_STATE, probability=True).fit(os_list[i][0], os_list[i][1]))
             
@@ -105,7 +107,6 @@ if __name__ == '__main__':
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
             pred_tmp.append(predict_data.calc_metrics(y_test, svm_clf[i].predict(X_test), roc_auc_area, i))
-
         
         # tree
         tree_clf = []
@@ -133,7 +134,7 @@ if __name__ == '__main__':
             pred_tmp.append(predict_data.calc_metrics(y_test, knn_clf[i].predict(X_test), roc_auc_area, i))
 
     pred_df = pd.DataFrame(pred_tmp)
-    pred_df.columns = ['os', 'sen(macro)', 'sen(micro)', 'spe(macro)', 'spe(micro)', 'geo(macro)', 'geo(micro)', 'AUC']
+    pred_df.columns = ['os', 'Sensitivity', 'Specificity', 'Geometric mean', 'AUC']
    
    # export resualt
     pred_df.to_csv(save_path, index=False)
