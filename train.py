@@ -33,8 +33,10 @@ def mndo(pos, num_minority):
 def append_mndo(X_train, y_train, df):
     X_mndo = df.drop('Label', axis=1)
     y_mndo = df.Label
-    X_mndo = pd.concat([X_mndo, X_train])
-    y_mndo = pd.concat([y_mndo, y_train])
+    X_mndo = np.concatenate((X_mndo, X_train), axis=0)
+    y_mndo = np.concatenate((y_mndo, y_train), axis=0)
+    #X_mndo = pd.concat([X_mndo, X_train])
+    #y_mndo = pd.concat([y_mndo, y_train])
     return X_mndo, y_mndo
 
 if __name__ == '__main__':
@@ -49,7 +51,7 @@ if __name__ == '__main__':
 
     # Split the data
     RANDOM_STATE = 6
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=RANDOM_STATE)
+    X_train, X_test, y_train, y_test = train_test_split(X.as_matrix(), y.as_matrix(), test_size=0.4, random_state=RANDOM_STATE)
     cnt = Counter(y_train)
     num_minority = int((cnt[0] - cnt[1]))
     print('y_train: {}'.format(Counter(y_train)))
@@ -85,11 +87,10 @@ if __name__ == '__main__':
         X_ada, y_ada = ada.fit_sample(X_train, y_train)
         os_list = [[X_reg, y_reg], [X_b1, y_b1], [X_b2, y_b2], [X_enn, y_enn],
                 [X_tomek, y_tomek], [X_ada, y_ada], [X_mndo, y_mndo]]
-        
-        # normalize
-        #os_list = preprocessing.normalization(os_list)
-        #os_list = preprocessing.standardization(os_list)
-        
+       
+        # scaling 
+        os_list, X_test_scaled = preprocessing.normalization(os_list, X_test)
+        #os_list, X_test_scaled = preprocessing.standardization(os_list, X_test)
     #-------------
     # Learning
     #-------------
@@ -103,11 +104,11 @@ if __name__ == '__main__':
             
         for i in range(len(svm_clf)):
             # calc auc
-            prob = svm_clf[i].predict_proba(X_test)[:,1]
+            prob = svm_clf[i].predict_proba(X_test_scaled[i])[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            pred_tmp.append(predict_data.calc_metrics(y_test, svm_clf[i].predict(X_test), roc_auc_area, i))
-        
+            pred_tmp.append(predict_data.calc_metrics(y_test, svm_clf[i].predict(X_test_scaled[i]), roc_auc_area, i))
+       
         # tree
         tree_clf = []
         for i in range(len(os_list)):
@@ -115,10 +116,10 @@ if __name__ == '__main__':
             
         for i in range(len(tree_clf)):
             # calc auc
-            prob = tree_clf[i].predict_proba(X_test)[:,1]
+            prob = tree_clf[i].predict_proba(X_test_scaled[i])[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            pred_tmp.append(predict_data.calc_metrics(y_test, tree_clf[i].predict(X_test), roc_auc_area, i))
+            pred_tmp.append(predict_data.calc_metrics(y_test, tree_clf[i].predict(X_test_scaled[i]), roc_auc_area, i))
 
         #k-NN
         k=3
@@ -128,13 +129,14 @@ if __name__ == '__main__':
             
         for i in range(len(knn_clf)):
             # calc auc
-            prob = knn_clf[i].predict_proba(X_test)[:,1]
+            prob = knn_clf[i].predict_proba(X_test_scaled[i])[:,1]
             fpr, tpr, thresholds = roc_curve(y_test, prob, pos_label=1)
             roc_auc_area = auc(fpr, tpr)
-            pred_tmp.append(predict_data.calc_metrics(y_test, knn_clf[i].predict(X_test), roc_auc_area, i))
+            pred_tmp.append(predict_data.calc_metrics(y_test, knn_clf[i].predict(X_test_scaled[i]), roc_auc_area, i))
 
     pred_df = pd.DataFrame(pred_tmp)
     pred_df.columns = ['os', 'Sensitivity', 'Specificity', 'Geometric mean', 'AUC']
    
    # export resualt
     pred_df.to_csv(save_path, index=False)
+
