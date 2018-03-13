@@ -1,15 +1,23 @@
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
 
 # Normalize
-def normalization(os_list):
+def normalization(os_list, X_test):
+    X_test_scaled = []
     for i in range(len(os_list)):
-        os_list[i][0] = normalize(os_list[i][0], norm='l2') 
-    return os_list  
+        sc = Normalizer(norm='l2')
+        sc.fit(os_list[i][0])
+        os_list[i][0] = sc.transform(os_list[i][0]) 
+        X_test_scaled.append(sc.transform(X_test))
+    return os_list, X_test_scaled
 
-# Standardization
-def standardization(os_list):
+# Standardize
+def standardization(os_list, X_test):
+    X_test_scaled = []
     for i in range(len(os_list)):
         sc = StandardScaler()
-        os_list[i][0] = sc.fit_transform(os_list[i][0])
-    return os_list
+        sc.fit(os_list[i][0])
+        os_list[i][0] = sc.transform(os_list[i][0])
+        X_test_scaled.append(sc.transform(X_test))
+
+    return os_list, X_test_scaled
