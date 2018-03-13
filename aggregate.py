@@ -31,5 +31,5 @@ if __name__ == '__main__':
         df = pd.concat([svm, tree, knn], axis=1)
         df.index = name
         df.drop('os', axis=1, inplace=True)
-        path = 'output/all/{}.csv'.format(ind[i])
+        path = 'result/data/{}.csv'.format(ind[i])
         df.to_csv(path)
