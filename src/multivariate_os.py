@@ -115,10 +115,10 @@ def mnd_os(pos, num_minority):
         #print(df)
     return df
 
-def append_data(pos, zero_std, no_corr):
+def append_data(pos, zero_std, no_corr, name):
     pos = pd.concat([pos, zero_std, no_corr], axis=1)
     pos['Label'] = 1
     #print(pos)
-    #pos.to_csv('/home/yura/Desktop/mlpd_train.csv', index=False)
+    pos.to_csv('~/Desktop/MNDO/pos_data/{}_mndo.csv'.format(name), index=False)
     return pos
 
