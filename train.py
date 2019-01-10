@@ -1,6 +1,6 @@
 # coding: utf-8
 import sys
-import os.path
+import os
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -17,8 +17,9 @@ from sklearn.metrics import roc_curve, auc
 
 # set save path
 def set_path(basename):
+    os.makedirs('./output', exist_ok=True)
     name = os.path.splitext(basename)
-    save_path = 'output/{}.csv'.format(name[0])
+    save_path = 'output/{}.csv'.format(name[0]) 
     return save_path
 
 # Multivariate over-sampling
