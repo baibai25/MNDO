@@ -11,6 +11,7 @@ for a in filelist:
     file = open(path, 'r').readlines()
     basename = os.path.basename(path)
     name = os.path.splitext(basename)
+    os.makedirs('./Predataset', exist_ok=True)
     output = 'Predataset/{}.csv'.format(name[0])
 
     file2 = []
