@@ -1,4 +1,3 @@
-# coding: utf-8
 import sys
 import os
 from tqdm import tqdm
@@ -36,38 +35,47 @@ def append_mndo(X_train, y_train, df):
     y_mndo = df.Label
     X_mndo = np.concatenate((X_mndo, X_train), axis=0)
     y_mndo = np.concatenate((y_mndo, y_train), axis=0)
-    #X_mndo = pd.concat([X_mndo, X_train])
-    #y_mndo = pd.concat([y_mndo, y_train])
     return X_mndo, y_mndo
+
 
 if __name__ == '__main__':
     # Load dataset
-    data = pd.read_csv(sys.argv[1])
-    save_path = set_path(os.path.basename(sys.argv[1]))
-
+    try:
+        data = pd.read_csv(sys.argv[1])
+        save_path = set_path(os.path.basename(sys.argv[1]))
+    except IndexError:
+        sys.exit('error: Must specify dataset file')
+    except FileNotFoundError:
+        sys.exit('error: No such file or directory')
+ 
+    # split the data
     X = data.drop('Label', axis=1)
     y = data.Label
+
+    # split positive class
     pos = data[data.Label == 1]
     pos = pos.drop('Label', axis=1)
 
-    # Split the data
+    # split arrays into train and test subsets 
     RANDOM_STATE = 6
     X_train, X_test, y_train, y_test = train_test_split(X.as_matrix(), y.as_matrix(), test_size=0.4, random_state=RANDOM_STATE)
     cnt = Counter(y_train)
     num_minority = int((cnt[0] - cnt[1]))
     print('y_train: {}'.format(Counter(y_train)))
     print('y_test: {}'.format(Counter(y_test)))
-    
+   
+    # SMOTE k-NN error handling
     if cnt[1] < 6:
         print("Can't apply SMOTE. Positive class samples is very small.")
         print("See : https://github.com/scikit-learn-contrib/imbalanced-learn/issues/27")
         sys.exit()
-
+  
     #-----------------
     # Preprocessing
     #-----------------
     # Multivariate over-sampling
     mndo_df = mndo(pos, num_minority)
+
     X_mndo, y_mndo = append_mndo(X_train, y_train, mndo_df)
     print('y_mndo: {}'.format(Counter(y_mndo)))
 
@@ -140,4 +148,3 @@ if __name__ == '__main__':
    
    # export resualt
     pred_df.to_csv(save_path, index=False)
-
