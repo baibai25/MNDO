@@ -14,9 +14,7 @@ def find_zerostd(pos, num_minority):
             if std[i] == 0:
                 zero_list.append(pos.columns[i])
                 zero_mean.append(mean[i])
-        #print(zero_list)
-        #print(zero_mean)
-
+    
     if (len(zero_list) == 0) and (len(zero_mean) == 0): 
         print("Not found zero std.")
         df = None
@@ -24,13 +22,14 @@ def find_zerostd(pos, num_minority):
         print("Found zero std! {}".format(zero_list))
         df_index = np.zeros(shape=(num_minority, len(zero_list)))
         df = pd.DataFrame(df_index, columns=zero_list)
-
+        
+        # fill mean value
         for i in range(len(zero_list)): 
             pos.drop(zero_list[i], axis=1, inplace=True)
             df[zero_list[i]] = zero_mean[i]
-    #print(pos)
-    #print(df)
+    
     return pos, df
+
 
 # Find no correlation and univariate sampling
 def no_corr(pos, num_minority):
@@ -47,7 +46,6 @@ def no_corr(pos, num_minority):
             sort = sort.sort_values(by=sort.columns[0], ascending=False) #sort
             
             if sort.values[1] < 0.2:
-                #print(sort.values[1])
                 mean_list.append(pos[pos.columns[i]].mean())
                 var_list.append(pos[pos.columns[i]].var())
                 col_list.append(pos.columns[i])
@@ -67,21 +65,19 @@ def no_corr(pos, num_minority):
         # convert to dataframe
         df = pd.DataFrame(tmp).T
         df.columns = col_list
+        
         # drop no correlation attributes
         for  i in range(len(col_list)):
             pos.drop(col_list[i], axis=1, inplace=True)
 
-    #print(mean_list, var_list)
-    #print(df)
-    #print(pos)
     return pos, df
+
 
 # Multivariate sampling
 def mnd_os(pos, num_minority):
     for i in tqdm(range(100), desc="Multi normal dist over-sampling", leave=False):
         # calc correlation and covert absolute value
         corr = abs(pos.corr())
-        #print(corr)
         
         # find strong correlation attribute
         corr_col = []
@@ -89,11 +85,9 @@ def mnd_os(pos, num_minority):
         for i in range(len(corr.columns)):
             sort = corr.iloc[:, [i]] #extract one index
             sort = sort.sort_values(by=sort.columns[0], ascending=False) #sort
-            #print(sort)
+            
             corr_col.append(sort.columns[0]) #strong corr coulumns
             corr_ind.append(sort.index[1]) #strong corr index
-        #print(corr_col)
-        #print(corr_ind)
         
         # calc mean and covariance
         mean_list = []
@@ -112,13 +106,16 @@ def mnd_os(pos, num_minority):
         # convert to dataframe
         df = pd.DataFrame(tmp).T
         df.columns = pos.columns
-        #print(df)
+    
     return df
+
 
 def append_data(pos, zero_std, no_corr, name):
     pos = pd.concat([pos, zero_std, no_corr], axis=1)
     pos['Label'] = 1
-    #print(pos)
-    pos.to_csv('~/Desktop/MNDO/pos_data/{}_mndo.csv'.format(name), index=False)
+
+    os.makedirs('./pos_data', exist_ok=True)
+    pos.to_csv('./pos_data/{}_mndo.csv'.format(name), index=False)
+    
     return pos
 
