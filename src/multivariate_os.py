@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -108,7 +109,6 @@ def mnd_os(pos, num_minority):
         df.columns = pos.columns
     
     return df
-
 
 def append_data(pos, zero_std, no_corr, name):
     pos = pd.concat([pos, zero_std, no_corr], axis=1)

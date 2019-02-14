@@ -19,14 +19,14 @@ def set_path(basename):
     os.makedirs('./output', exist_ok=True)
     name = os.path.splitext(basename)
     save_path = 'output/{}.csv'.format(name[0]) 
-    return save_path
+    return save_path, name[0]
 
 # Multivariate over-sampling
-def mndo(pos, num_minority):
+def mndo(pos, num_minority, name):
     pos, zero_std = multivariate_os.find_zerostd(pos, num_minority)
     pos, no_corr = multivariate_os.no_corr(pos, num_minority)
     pos = multivariate_os.mnd_os(pos, num_minority)
-    mndo_df = multivariate_os.append_data(pos, zero_std, no_corr)
+    mndo_df = multivariate_os.append_data(pos, zero_std, no_corr, name)
     return mndo_df
 
 # train data + mndo data
@@ -42,12 +42,12 @@ if __name__ == '__main__':
     # Load dataset
     try:
         data = pd.read_csv(sys.argv[1])
-        save_path = set_path(os.path.basename(sys.argv[1]))
+        save_path, file_name = set_path(os.path.basename(sys.argv[1]))
     except IndexError:
         sys.exit('error: Must specify dataset file')
     except FileNotFoundError:
         sys.exit('error: No such file or directory')
- 
+    
     # split the data
     X = data.drop('Label', axis=1)
     y = data.Label
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     # split positive class
     pos = data[data.Label == 1]
     pos = pos.drop('Label', axis=1)
-
+    
     # split arrays into train and test subsets 
     RANDOM_STATE = 6
     X_train, X_test, y_train, y_test = train_test_split(X.as_matrix(), y.as_matrix(), test_size=0.4, random_state=RANDOM_STATE)
@@ -69,15 +69,15 @@ if __name__ == '__main__':
         print("Can't apply SMOTE. Positive class samples is very small.")
         print("See : https://github.com/scikit-learn-contrib/imbalanced-learn/issues/27")
         sys.exit()
-  
+
     #-----------------
     # Preprocessing
     #-----------------
     # Multivariate over-sampling
-    mndo_df = mndo(pos, num_minority)
+    mndo_df = mndo(pos, num_minority, file_name)
 
     X_mndo, y_mndo = append_mndo(X_train, y_train, mndo_df)
-    print('y_mndo: {}'.format(Counter(y_mndo)))
+    #print('y_mndo: {}'.format(Counter(y_mndo)))
 
     for i in tqdm(range(100), desc="Preprocessing", leave=False):
         # Apply over-sampling
@@ -100,6 +100,7 @@ if __name__ == '__main__':
         # scaling 
         os_list, X_test_scaled = preprocessing.normalization(os_list, X_test)
         #os_list, X_test_scaled = preprocessing.standardization(os_list, X_test)
+
     #-------------
     # Learning
     #-------------
@@ -109,7 +110,7 @@ if __name__ == '__main__':
 
         #svm
         for i in range(len(os_list)):
-            svm_clf.append(svm.SVC(random_state=RANDOM_STATE, probability=True).fit(os_list[i][0], os_list[i][1]))
+            svm_clf.append(svm.SVC(gamma='auto', random_state=RANDOM_STATE, probability=True).fit(os_list[i][0], os_list[i][1]))
             
         for i in range(len(svm_clf)):
             # calc auc
@@ -146,5 +147,5 @@ if __name__ == '__main__':
     pred_df = pd.DataFrame(pred_tmp)
     pred_df.columns = ['os', 'Sensitivity', 'Specificity', 'Geometric mean', 'AUC']
    
-   # export resualt
+    # export resualt
     pred_df.to_csv(save_path, index=False)
