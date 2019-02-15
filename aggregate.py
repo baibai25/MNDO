@@ -1,4 +1,4 @@
-import glob, os
+import glob, os, sys
 import pandas as pd
 
 def get_name(files):
@@ -10,7 +10,21 @@ def get_name(files):
     return name
 
 if __name__ == '__main__':
-    files = glob.glob('output/*.csv')
+    
+    # exception handling
+    os.makedirs('./result/data', exist_ok=True)
+
+    if (os.path.isdir('./output') == True):
+        files = glob.glob('./output/*.csv')
+    else:
+        print('Error: Not found ./output')
+        sys.exit()
+         
+    if files == []:
+        print('Error: Not found csv file')
+        sys.exit()
+    
+    # aggregate predict results
     name = get_name(files)
     ind = ['sm', 'b1', 'b2', 'enn', 'tom', 'ada', 'mnd']
     col = ['os', 'Sensitivity', 'Specificity', 'Geometric mean', 'AUC'] 
