@@ -116,6 +116,7 @@ def append_data(pos, zero_std, no_corr, name):
 
     os.makedirs('./pos_data', exist_ok=True)
     pos.to_csv('./pos_data/{}_mndo.csv'.format(name), index=False)
-    
+    print('Generated data is saved in ./pos_data/{}_mndo.csv'.format(name))    
+
     return pos
 
