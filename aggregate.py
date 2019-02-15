@@ -12,7 +12,7 @@ def get_name(files):
 if __name__ == '__main__':
     
     # exception handling
-    os.makedirs('./result', exist_ok=True)
+    os.makedirs('./result/data', exist_ok=True)
 
     if (os.path.isdir('./output') == True):
         files = glob.glob('./output/*.csv')
@@ -45,5 +45,5 @@ if __name__ == '__main__':
         df = pd.concat([svm, tree, knn], axis=1)
         df.index = name
         df.drop('os', axis=1, inplace=True)
-        path = 'result/{}.csv'.format(ind[i])
+        path = 'result/data/{}.csv'.format(ind[i])
         df.to_csv(path)
