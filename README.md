@@ -7,7 +7,6 @@ Python implementation of MNDO (Multivariate Normal Distribution based Oversampli
 ## Requirements
 + Anaconda / Python 3.6
 + tqdm 4.31.1
-+ scikit-learn 4.31.1
 + imbalanced-learn 0.4.3
 
 
